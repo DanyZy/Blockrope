@@ -1,12 +1,10 @@
-import hashlib
-import ecdsa
 import random
 import secrets
 import time
 from pynput import mouse
 
 
-class PrivateKeyGenerator:
+class KeyGen:
 
     def __init__(self):
         self.POOL_SIZE = 256
@@ -14,7 +12,7 @@ class PrivateKeyGenerator:
         self.CURVE_ORDER = int('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141', 16)
         self.pool = [0] * self.POOL_SIZE
         self.pool_pointer = 0
-        self.prng_state = None
+        self.pool_rng_state = None
         self.__init_pool()
 
     def seed_input_str(self, str_input):
@@ -24,15 +22,23 @@ class PrivateKeyGenerator:
             char_code = ord(char)
             self.__seed_byte(char_code)
 
-    def seed_input_cords(self, x, y, fun):
-        time_int = int(time.time())
-        self.__seed_int(time_int)
-        self.__seed_int(fun(x, y))
+    def seed_input_cords(self, fun=lambda x, y: x + y):
+        def on_click(x, y, button, pressed):
+            if pressed and button == mouse.Button.left:
+                print(x, y)
+                time_int = int(time.time())
+                self.__seed_int(time_int)
+                self.__seed_int(fun(x, y))
+            elif pressed and button == mouse.Button.right:
+                return False
+
+        with mouse.Listener(on_click=on_click) as listener:
+            listener.join()
 
     def generate_key(self):
         big_int = self.__generate_big_int()
-        big_int = big_int % (self.CURVE_ORDER - 1)  # key < curve order
-        big_int = big_int + 1  # key > 0
+        big_int %= self.CURVE_ORDER - 1  # key < curve order
+        big_int += 1  # key > 0
         key = hex(big_int)[2:]
         # Add leading zeros if the hex key is smaller than 64 chars
         key = key.zfill(self.KEY_BYTES * 2)
@@ -58,32 +64,17 @@ class PrivateKeyGenerator:
             self.pool_pointer = 0
 
     def __generate_big_int(self):
-        if self.prng_state is None:
+        if self.pool_rng_state is None:
             seed = int.from_bytes(self.pool, byteorder='big', signed=False)
             random.seed(seed)
-            self.prng_state = random.getstate()
-        random.setstate(self.prng_state)
+            self.pool_rng_state = random.getstate()
+        random.setstate(self.pool_rng_state)
         big_int = random.getrandbits(self.KEY_BYTES * 8)
-        self.prng_state = random.getstate()
+        self.pool_rng_state = random.getstate()
         return big_int
 
 
-kg = PrivateKeyGenerator()
-
-
-def on_click(x, y, button, pressed):
-    if pressed and button == mouse.Button.left:
-        print(x, y)
-        kg.seed_input_cords(x, y, lambda x, y: x + y)
-    elif pressed and button == mouse.Button.right:
-        print(kg.generate_key())
-        return False
-
-
-with mouse.Listener(on_click=on_click) as listener:
-    listener.join()
-
-
-# kg.seed_input_str("kek")
-# prk = kg.generate_key()
-
+pkg = KeyGen()
+pkg.seed_input_cords()
+prk = pkg.generate_key()
+print(prk)
