@@ -2,7 +2,7 @@ import ecdsa
 import hashlib
 import codecs
 from base58 import b58encode
-from PrivateKeyGenerator import KeyGenerator
+from blockrope.PrivateKeyGenerator import KeyGenerator
 
 
 class BitcoinWallet:
@@ -11,7 +11,7 @@ class BitcoinWallet:
     For generation, it is enough to create an instance of the object.
 
     Usage:
-    - create an instance of BitcoinWallet class
+    - create an instance of BitcoinWallet class with private key as argument
     - call a getter method like attribute:
       get_public_key, get_short_public_key or get_address
     """
