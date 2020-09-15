@@ -1,6 +1,7 @@
 import random
 import secrets
 import time
+from binascii import unhexlify
 from pynput import mouse
 
 
@@ -23,7 +24,7 @@ class KeyGenerator:
         self.pool = [0] * self.POOL_SIZE
         self.pool_pointer = 0
         self.pool_rng_state = None
-        self.key = "not generated"
+        self.key = b"not generated"
         self.__init_pool()
 
     def __str__(self):
@@ -69,7 +70,7 @@ class KeyGenerator:
         """
         A method that generates a private key based
         on a number obtained from a set of obtained entropy.
-        :return: string
+        :return: bytes
         """
         big_int = self.__generate_big_int()
         big_int %= self.CURVE_ORDER - 1  # for case when key < curve order
@@ -77,7 +78,7 @@ class KeyGenerator:
         key = hex(big_int)[2:]  # remove 0x
         # Add leading zeros if hex key is smaller than 64 chars
         key = key.zfill(self.KEY_BYTES * 2)
-        self.key = key
+        self.key = unhexlify(key)
 
     def __init_pool(self):
         """
@@ -124,11 +125,3 @@ class KeyGenerator:
         big_int = random.getrandbits(self.KEY_BYTES * 8)
         self.pool_rng_state = random.getstate()
         return big_int
-
-
-pkg = KeyGenerator()
-pkg.seed_input_cords()
-prk = pkg.generate_key()
-print(pkg)
-print(prk)
-print(help(KeyGenerator))

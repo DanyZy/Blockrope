@@ -1,7 +1,7 @@
 import ecdsa
 import hashlib
 import codecs
-from base58 import b58encode
+import base58
 from blockrope.PrivateKeyGenerator import KeyGenerator
 
 
@@ -17,8 +17,8 @@ class BitcoinWallet:
     """
 
     def __init__(self, private_key):
-        self.TESTNET = False
-        self.COMPRESSED = True
+        self.TESTNET = True
+        self.COMPRESSED = False
         self.private_key = private_key
         self.public_key = "not generated"
         self.short_public_key = "not generated"
@@ -112,13 +112,16 @@ class BitcoinWallet:
         checksum = c[:8]
         # concatenate public key and checksum to get the address
         address_hex = (network_bitcoin_public_key + checksum).decode("utf-8")
-        address = b58encode(address_hex)
+        address = base58.b58encode(address_hex)
         self.address = address
 
 
-prikg = KeyGenerator()
-prikg.seed_input_str("kek")
-prikg.generate_key()
-pubkg = BitcoinWallet(prikg.get_private_key)
-print(pubkg.get_short_public_key)
-print(pubkg)
+if __name__ == "__main__":
+    prikg = KeyGenerator()
+    prikg.seed_input_str("sdfg")
+    prikg.generate_key()
+    prik = prikg.get_private_key
+    pubkg = BitcoinWallet(prik)
+    print(prikg)
+    print(pubkg)
+

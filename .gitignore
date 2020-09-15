@@ -130,3 +130,7 @@ dmypy.json
 
 # PyCharm local files
 .idea/
+
+# LibPackages
+.blokrope.edd-info/
+.dist/

@@ -2,4 +2,4 @@
 desc
 """
 from .PrivateKeyGenerator import KeyGenerator
-from .BitcoinWalletGenerator import BitcoinWallet
+from .BitcoinWallet import Wallet
