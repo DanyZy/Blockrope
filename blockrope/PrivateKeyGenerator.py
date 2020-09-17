@@ -21,18 +21,18 @@ class KeyGenerator:
         self.KEY_BYTES = 32
         # because of ECDSA bitcoin key should be positive and less than the order of curve secp256k1
         self.CURVE_ORDER = int("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16)
-        self.pool = [0] * self.POOL_SIZE
-        self.pool_pointer = 0
-        self.pool_rng_state = None
-        self.key = b"not generated"
+        self._pool = [0] * self.POOL_SIZE
+        self._pool_pointer = 0
+        self._pool_rng_state = None
+        self._key = b"not generated"
         self.__init_pool()
 
     def __str__(self):
-        return "Private Key: {}".format(self.key)
+        return "Private Key: {}".format(self._key)
 
     @property
-    def get_private_key(self):
-        return self.key
+    def private_key(self):
+        return self._key
 
     def seed_input_str(self, str_input):
         """
@@ -78,7 +78,7 @@ class KeyGenerator:
         key = hex(big_int)[2:]  # remove 0x
         # Add leading zeros if hex key is smaller than 64 chars
         key = key.zfill(self.KEY_BYTES * 2)
-        self.key = unhexlify(key)
+        self._key = unhexlify(key)
 
     def __init_pool(self):
         """
@@ -106,10 +106,10 @@ class KeyGenerator:
         Method to seeding bytes into pool with entropy.
         :param n: any integer
         """
-        self.pool[self.pool_pointer] ^= n & 255
-        self.pool_pointer += 1
-        if self.pool_pointer >= self.POOL_SIZE:
-            self.pool_pointer = 0
+        self._pool[self._pool_pointer] ^= n & 255
+        self._pool_pointer += 1
+        if self._pool_pointer >= self.POOL_SIZE:
+            self._pool_pointer = 0
 
     def __generate_big_int(self):
         """
@@ -117,11 +117,11 @@ class KeyGenerator:
         the form of a byte array to a numeric type.
         :return: integer
         """
-        if self.pool_rng_state is None:
-            seed = int.from_bytes(self.pool, byteorder="big", signed=False)
+        if self._pool_rng_state is None:
+            seed = int.from_bytes(self._pool, byteorder="big", signed=False)
             random.seed(seed)
-            self.pool_rng_state = random.getstate()
-        random.setstate(self.pool_rng_state)
+            self._pool_rng_state = random.getstate()
+        random.setstate(self._pool_rng_state)
         big_int = random.getrandbits(self.KEY_BYTES * 8)
-        self.pool_rng_state = random.getstate()
+        self._pool_rng_state = random.getstate()
         return big_int
