@@ -7,3 +7,6 @@ class Config:
         }
         self._compressed = False
         self._net_byte = "TESTNET"
+        self._save_data = True
+        self._wallet_data_path = "C:\\Users\\Daniil\\PyCharmProjects\\Blockchain"
+        self._wallet_data_limit = 10

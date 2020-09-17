@@ -134,3 +134,6 @@ dmypy.json
 # LibPackages
 .blokrope.edd-info/
 .dist/
+
+# Data files
+data.json
