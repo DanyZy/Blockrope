@@ -135,7 +135,8 @@ dmypy.json
 .blokrope.edd-info/
 .dist/
 
-# Data files
+# Json local files
+config.json
 data.json
 
 # Test files

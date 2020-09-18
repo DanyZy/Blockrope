@@ -4,42 +4,40 @@ import os
 
 class Config:
     def __init__(self):
-        self.ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-        self.CONFIG_PATH = os.path.join(self.ROOT_DIR, 'config.json')
-        print(self.ROOT_DIR)
-        print(self.CONFIG_PATH)
+        self.ROOT_PATH = os.path.abspath(os.curdir)
         self.NET_BYTES: dict = {
             "TESTNET": b'\x6f',
             "MAINNET": b'\x00',
             "NAMENET": b'\x34'
         }
-        self.__config_file_init()
-        self.__set_config_data("wallet_data_path", self.ROOT_DIR)
         self._compressed = self.__get_config_data()["compressed"]
         self._net_byte = self.__get_config_data()["net_byte"]
         self._save_data = self.__get_config_data()["save_data"]
         self._wallet_data_path = self.__get_config_data()["wallet_data_path"]
         self._wallet_data_cache = self.__get_config_data()["wallet_data_cache"]
 
-    def __config_file_init(self):
-        to_json = {
-            "compressed": False,
-            "net_byte": "TESTNET",
-            "save_data": True,
-            "wallet_data_path": "",
-            "wallet_data_cache": 5
-        }
-        with open(self.CONFIG_PATH, "w") as json_file:
-            json.dump(to_json, json_file, indent=5)
-
     def __get_config_data(self):
-        with open(self.CONFIG_PATH) as json_file:
-            return json.load(json_file)
+        path = "{}\\config.json".format(self.ROOT_PATH)
+        try:
+            with open(path) as json_file:
+                return json.load(json_file)
+        except FileNotFoundError:
+            data = {
+                "compressed": False,
+                "net_byte": "TESTNET",
+                "save_data": True,
+                "wallet_data_path": self.ROOT_PATH,
+                "wallet_data_cache": 5
+            }
+            with open(path, "w") as json_file:
+                json.dump(data, json_file, indent=5)
+            return data
 
     def __set_config_data(self, key, value):
-        with open(self.CONFIG_PATH, "w") as json_file:
-            data = self.__get_config_data()
-            data[key] = value
+        path = "{}\\config.json".format(self.ROOT_PATH)
+        data = self.__get_config_data()
+        data[key] = value
+        with open(path, "w") as json_file:
             json.dump(data, json_file, indent=5)
 
     @property
