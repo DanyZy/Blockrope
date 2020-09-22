@@ -6,7 +6,6 @@ import time
 from collections import OrderedDict
 from binascii import hexlify
 from base58 import b58encode
-from blockrope.PrivateKeyGenerator import KeyGenerator
 from blockrope.WalletConfigurator import Config
 
 
@@ -79,12 +78,3 @@ class Wallet(Config):
         checksum = hashlib.sha256(hashlib.sha256(r).digest()).digest()[0:4]
         return b58encode(r + checksum)
 
-
-if __name__ == '__main__':
-    kg = KeyGenerator()
-    kg.seed_input_cords()
-    kg.generate_key()
-    c = Config()
-    Config.compressed = True
-    wallet = Wallet(private_key=kg.private_key)
-    print(wallet.compressed)

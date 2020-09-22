@@ -72,7 +72,7 @@ class Config:
 
     @save_data.setter
     def save_data(self, value):
-        self.__set_config_data("net_byte", value)
+        self.__set_config_data("save_data", value)
         self._save_data = value
 
     @wallet_data_path.setter
