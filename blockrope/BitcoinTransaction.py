@@ -2,6 +2,8 @@
 # outputs is a list of [redemptionSatoshis, outputScript]
 import hashlib
 import struct
+from codecs import decode, encode
+import unittest
 
 import ecdsa
 
@@ -9,16 +11,16 @@ import ecdsa
 def make_raw_transaction(output_transaction_hash, source_index, script_sig, outputs):
     def make_output(data):
         redemption_satoshis, output_script = data
-        return (struct.pack("<Q", redemption_satoshis).hex() +
-                '%02x' % len(output_script.decode('hex')) + output_script)
+        return (encode(struct.pack("<Q", redemption_satoshis), "hex").decode("utf-8") +
+                "%02x" % len(decode(output_script, "hex")) + output_script)
 
     formatted_outputs = ''.join(map(make_output, outputs))
     return (
             "01000000" +  # 4 bytes version
             "01" +  # varint for number of inputs
-            output_transaction_hash.decode('hex')[::-1].encode('hex') +  # reverse output_transaction_hash
-            struct.pack('<L', source_index).hex() +
-            '%02x' % len(script_sig.decode('hex')) + script_sig +
+            encode(decode(output_transaction_hash, "hex")[::-1], "hex").decode("utf-8") +  # reverse output_transaction_hash
+            encode(struct.pack('<L', source_index), "hex").decode("utf-8") +
+            '%02x' % len(decode(script_sig, "hex")) + script_sig +
             "ffffffff" +  # sequence
             "%02x" % len(outputs) +  # number of outputs
             formatted_outputs +
@@ -166,3 +168,24 @@ def makeSignedTransaction(privateKey, outputTransactionHash, sourceIndex, script
     signed_txn = make_raw_transaction(outputTransactionHash, sourceIndex, scriptSig, outputs)
     verifyTxnSignature(signed_txn)
     return signed_txn
+
+
+class TestTxnUtils(unittest.TestCase):
+
+    def test_make_raw_transaction(self):
+        txn = make_raw_transaction(
+            "f2b3eb2deb76566e7324307cd47c35eeb88413f971d88519859b1834307ecfec",  # output transaction hash
+            1,  # sourceIndex
+            "76a914010966776006953d5567439e5e39f86a0d273bee88ac",  # scriptSig
+            [[99900000,  # satoshis
+              "76a914097072524438d003d23a2f23edb65aae1bb3e46988ac"]],  # outputScript
+        ) + "01000000"  # hash code type
+        self.assertEqual(txn,
+                         "0100000001eccf7e3034189b851985d871f91384b8ee357cd47c3024736e5676eb2debb3f2" +
+                         "010000001976a914010966776006953d5567439e5e39f86a0d273bee88acffffffff" +
+                         "01605af405000000001976a914097072524438d003d23a2f23edb65aae1bb3e46988ac" +
+                         "0000000001000000")
+
+
+if __name__ == '__main__':
+    unittest.main()
