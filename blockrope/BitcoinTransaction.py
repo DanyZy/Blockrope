@@ -20,7 +20,7 @@ def make_raw_transaction(output_transaction_hash, source_index, script_sig, outp
             "01" +  # varint for number of inputs
             encode(decode(output_transaction_hash, "hex")[::-1], "hex").decode("utf-8") +  # reverse output_transaction_hash
             encode(struct.pack('<L', source_index), "hex").decode("utf-8") +
-            '%02x' % len(decode(script_sig, "hex")) + script_sig +
+            "%02x" % len(decode(script_sig, "hex")) + script_sig +
             "ffffffff" +  # sequence
             "%02x" % len(outputs) +  # number of outputs
             formatted_outputs +
